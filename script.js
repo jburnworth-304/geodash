@@ -116,5 +116,26 @@ function resetGame() {
   frame = 0;
   gameOver = false;
 }
+function drawDino(x, y) {
+  ctx.fillStyle = "#00ffcc";
 
+  // Body
+  ctx.fillRect(x, y + 10, 30, 20);
+
+  // Head
+  ctx.fillRect(x + 20, y, 15, 15);
+
+  // Eye
+  ctx.fillStyle = "black";
+  ctx.fillRect(x + 30, y + 5, 3, 3);
+
+  ctx.fillStyle = "#00ffcc";
+
+  // Legs
+  ctx.fillRect(x + 5, y + 30, 5, 10);
+  ctx.fillRect(x + 20, y + 30, 5, 10);
+
+  // Tail
+  ctx.fillRect(x - 10, y + 15, 10, 5);
+}
 gameLoop();
