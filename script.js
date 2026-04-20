@@ -1,11 +1,12 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Player
+// Player (dino)
 let player = {
   x: 50,
   y: 200,
-  size: 30,
+  width: 40,
+  height: 40,
   dy: 0,
   gravity: 0.8,
   jump: -12,
@@ -23,6 +24,7 @@ document.addEventListener("keydown", (e) => {
     player.dy = player.jump;
     player.grounded = false;
   }
+
   if (gameOver) resetGame();
 });
 
@@ -33,7 +35,7 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-// Update
+// Update logic
 function update() {
   if (gameOver) return;
 
@@ -44,8 +46,8 @@ function update() {
   player.y += player.dy;
 
   // Ground
-  if (player.y + player.size >= canvas.height) {
-    player.y = canvas.height - player.size;
+  if (player.y + player.height >= canvas.height) {
+    player.y = canvas.height - player.height;
     player.dy = 0;
     player.grounded = true;
   }
@@ -63,13 +65,13 @@ function update() {
   // Move obstacles
   obstacles.forEach(o => o.x -= 5);
 
-  // Collision
+  // Collision detection
   obstacles.forEach(o => {
     if (
       player.x < o.x + o.width &&
-      player.x + player.size > o.x &&
+      player.x + player.width > o.x &&
       player.y < o.y + o.height &&
-      player.y + player.size > o.y
+      player.y + player.height > o.y
     ) {
       gameOver = true;
     }
@@ -79,13 +81,12 @@ function update() {
   obstacles = obstacles.filter(o => o.x > -20);
 }
 
-// Draw
+// Draw everything
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Player
-  ctx.fillStyle = "#00ffcc";
-  ctx.fillRect(player.x, player.y, player.size, player.size);
+  // Draw dino
+  drawDino(player.x, player.y);
 
   // Obstacles
   ctx.fillStyle = "red";
@@ -104,18 +105,11 @@ function draw() {
   if (gameOver) {
     ctx.fillStyle = "white";
     ctx.font = "30px Arial";
-    ctx.fillText("Game Over - Press Any Key", 200, 150);
+    ctx.fillText("Game Over - Press Any Key", 180, 150);
   }
 }
 
-// Reset
-function resetGame() {
-  player.y = 200;
-  player.dy = 0;
-  obstacles = [];
-  frame = 0;
-  gameOver = false;
-}
+// Dino drawing
 function drawDino(x, y) {
   ctx.fillStyle = "#00ffcc";
 
@@ -131,11 +125,27 @@ function drawDino(x, y) {
 
   ctx.fillStyle = "#00ffcc";
 
-  // Legs
-  ctx.fillRect(x + 5, y + 30, 5, 10);
-  ctx.fillRect(x + 20, y + 30, 5, 10);
+  // Legs (simple animation)
+  if (frame % 20 < 10) {
+    ctx.fillRect(x + 5, y + 30, 5, 10);
+    ctx.fillRect(x + 20, y + 30, 5, 10);
+  } else {
+    ctx.fillRect(x + 8, y + 30, 5, 10);
+    ctx.fillRect(x + 18, y + 30, 5, 10);
+  }
 
   // Tail
   ctx.fillRect(x - 10, y + 15, 10, 5);
 }
+
+// Reset game
+function resetGame() {
+  player.y = 200;
+  player.dy = 0;
+  obstacles = [];
+  frame = 0;
+  gameOver = false;
+}
+
+// Start game
 gameLoop();
