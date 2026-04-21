@@ -1,13 +1,13 @@
 body {
   text-align: center;
-  background: #111;
+  background: radial-gradient(circle, #111 20%, #000);
   color: white;
   font-family: Arial;
 }
 
 canvas {
-  background: #222;
+  background: #1b1b1b;
   display: block;
   margin: 20px auto;
-  border: 2px solid white;
+  border: 2px solid #555;
 }
