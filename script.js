@@ -13,10 +13,13 @@ let player = {
   grounded: false
 };
 
-// Obstacles
+// Game state
 let obstacles = [];
 let frame = 0;
 let gameOver = false;
+
+// Random spawn timer
+let nextSpawn = randomRange(60, 140);
 
 // Controls
 document.addEventListener("keydown", (e) => {
@@ -52,14 +55,10 @@ function update() {
     player.grounded = true;
   }
 
-  // Spawn obstacles
-  if (frame % 90 === 0) {
-    obstacles.push({
-      x: canvas.width,
-      y: canvas.height - 30,
-      width: 20,
-      height: 30
-    });
+  // Spawn asteroids at random intervals
+  if (frame >= nextSpawn) {
+    spawnAsteroid();
+    nextSpawn = frame + randomRange(60, 140); // new random delay
   }
 
   // Move obstacles
@@ -68,44 +67,46 @@ function update() {
   // Collision detection
   obstacles.forEach(o => {
     if (
-      player.x < o.x + o.width &&
+      player.x < o.x + o.size &&
       player.x + player.width > o.x &&
-      player.y < o.y + o.height &&
+      player.y < o.y + o.size &&
       player.y + player.height > o.y
     ) {
       gameOver = true;
     }
   });
 
-  // Remove off-screen obstacles
-  obstacles = obstacles.filter(o => o.x > -20);
+  // Remove off-screen
+  obstacles = obstacles.filter(o => o.x > -50);
 }
 
 // Draw everything
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Draw dino
+  // Stars background (simple)
+  drawStars();
+
+  // Dino
   drawDino(player.x, player.y);
 
-  // Obstacles
-  ctx.fillStyle = "red";
+  // Asteroids
   obstacles.forEach(o => {
-    ctx.fillRect(o.x, o.y, o.width, o.height);
+    drawAsteroid(o.x, o.y, o.size);
   });
 
-  // Ground line
-  ctx.strokeStyle = "white";
+  // Ground
+  ctx.strokeStyle = "#666";
   ctx.beginPath();
   ctx.moveTo(0, canvas.height);
   ctx.lineTo(canvas.width, canvas.height);
   ctx.stroke();
 
-  // Game over text
+  // Game over
   if (gameOver) {
     ctx.fillStyle = "white";
     ctx.font = "30px Arial";
-    ctx.fillText("Game Over - Press Any Key", 180, 150);
+    ctx.fillText("Game Over - Press Any Key", 170, 150);
   }
 }
 
@@ -113,19 +114,14 @@ function draw() {
 function drawDino(x, y) {
   ctx.fillStyle = "#00ffcc";
 
-  // Body
-  ctx.fillRect(x, y + 10, 30, 20);
+  ctx.fillRect(x, y + 10, 30, 20); // body
+  ctx.fillRect(x + 20, y, 15, 15);  // head
 
-  // Head
-  ctx.fillRect(x + 20, y, 15, 15);
-
-  // Eye
   ctx.fillStyle = "black";
-  ctx.fillRect(x + 30, y + 5, 3, 3);
+  ctx.fillRect(x + 30, y + 5, 3, 3); // eye
 
   ctx.fillStyle = "#00ffcc";
 
-  // Legs (simple animation)
   if (frame % 20 < 10) {
     ctx.fillRect(x + 5, y + 30, 5, 10);
     ctx.fillRect(x + 20, y + 30, 5, 10);
@@ -134,8 +130,50 @@ function drawDino(x, y) {
     ctx.fillRect(x + 18, y + 30, 5, 10);
   }
 
-  // Tail
-  ctx.fillRect(x - 10, y + 15, 10, 5);
+  ctx.fillRect(x - 10, y + 15, 10, 5); // tail
+}
+
+// Asteroid drawing
+function drawAsteroid(x, y, size) {
+  ctx.fillStyle = "#888";
+
+  ctx.beginPath();
+  ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // craters
+  ctx.fillStyle = "#666";
+
+  ctx.beginPath();
+  ctx.arc(x + size / 3, y + size / 3, size / 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(x + size / 1.5, y + size / 2, size / 7, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(x + size / 2, y + size / 1.5, size / 8, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// Stars background
+function drawStars() {
+  ctx.fillStyle = "white";
+  for (let i = 0; i < 20; i++) {
+    ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 1, 1);
+  }
+}
+
+// Spawn asteroid
+function spawnAsteroid() {
+  let size = 20 + Math.random() * 30;
+
+  obstacles.push({
+    x: canvas.width,
+    y: canvas.height - size,
+    size: size
+  });
 }
 
 // Reset game
@@ -145,7 +183,13 @@ function resetGame() {
   obstacles = [];
   frame = 0;
   gameOver = false;
+  nextSpawn = randomRange(60, 140);
 }
 
-// Start game
+// Utility
+function randomRange(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+// Start
 gameLoop();
